@@ -36,7 +36,19 @@ public partial class Form1 : Form
 
         treeView1.ImageList = CreateImageList();
         treeView1.BeforeExpand += TreeView_BeforeExpand;
-        
+
+        // デスクトップを最初に追加
+        {
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var desktopNode = new TreeNode("デスクトップ")
+            {
+                Tag = desktopPath,
+                ImageIndex = 0,
+                SelectedImageIndex = 0
+            };
+            desktopNode.Nodes.Add(""); // 展開可能にするためのダミー
+            treeView1.Nodes.Add(desktopNode);
+        }
         // ドライブを追加
         foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady))
         {
@@ -49,6 +61,19 @@ public partial class Form1 : Form
             node.Nodes.Add("");  // 展開可能にするためのダミー
             treeView1.Nodes.Add(node);
         }
+
+        fileListView.Dock = DockStyle.None;
+        fileListView.View = View.Details;   // 詳細表示モード
+        fileListView.FullRowSelect = true; // 行全体を選択
+        fileListView.GridLines = true;      // グリッド線を表示
+        fileListView.SmallImageList = CreateImageList();
+
+        fileListView.Columns.Add("名前", 200);
+        fileListView.Columns.Add("変更後ファイル名", 200);
+        fileListView.Columns.Add("サイズ", 80, HorizontalAlignment.Right);
+        fileListView.Columns.Add("ファイルの種類", 100);
+        
+        
     }
 
     private ImageList CreateImageList()
@@ -134,4 +159,7 @@ public partial class Form1 : Form
             catch (UnauthorizedAccessException) { }
         }
     }
+
+
+    
 }

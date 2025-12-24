@@ -30,6 +30,7 @@ partial class Form1
     private void InitializeComponent()
     {
         treeView1 = new System.Windows.Forms.TreeView();
+        fileListView = new System.Windows.Forms.ListView();
         SuspendLayout();
         // 
         // treeView1
@@ -39,15 +40,26 @@ partial class Form1
         treeView1.Size = new System.Drawing.Size(253, 286);
         treeView1.TabIndex = 0;
         // 
+        // fileListView
+        // 
+        fileListView.Location = new System.Drawing.Point(291, 12);
+        fileListView.Name = "fileListView";
+        fileListView.Size = new System.Drawing.Size(478, 384);
+        fileListView.TabIndex = 1;
+        fileListView.UseCompatibleStateImageBehavior = false;
+        // 
         // Form1
         // 
         AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
         AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        ClientSize = new System.Drawing.Size(800, 450);
+        ClientSize = new System.Drawing.Size(950, 450);
+        Controls.Add(fileListView);
         Controls.Add(treeView1);
         Text = "Form1";
         ResumeLayout(false);
     }
+
+    private System.Windows.Forms.ListView fileListView;
 
     private System.Windows.Forms.TreeView treeView1;
 
