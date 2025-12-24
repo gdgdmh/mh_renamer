@@ -146,6 +146,8 @@ public partial class Form1 : Form
                     node.Nodes.Add(child);
                 }
 
+                // treeviewにはファイルはいったんなし
+                /*
                 foreach (var file in Directory.GetFiles(path))
                 {
                     node.Nodes.Add(new TreeNode(Path.GetFileName(file))
@@ -155,6 +157,7 @@ public partial class Form1 : Form
                         SelectedImageIndex = 1
                     });
                 }
+                */
             }
             catch (UnauthorizedAccessException) { }
         }
