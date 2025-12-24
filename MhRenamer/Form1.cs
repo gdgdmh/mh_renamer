@@ -36,6 +36,7 @@ public partial class Form1 : Form
 
         treeView1.ImageList = CreateImageList();
         treeView1.BeforeExpand += TreeView_BeforeExpand;
+        treeView1.AfterSelect += TreeView_AfterSelect;
 
         // デスクトップを最初に追加
         {
@@ -163,6 +164,113 @@ public partial class Form1 : Form
         }
     }
 
+    private async void TreeView_AfterSelect(object? sender, TreeViewEventArgs e)
+    {
+        if (e.Node?.Tag is string path && Directory.Exists(path))
+        {
+            await LoadFilesToListViewAsync(path);
+        }
+    }
 
+    private CancellationTokenSource? _loadCancellation;
+    private async Task LoadFilesToListViewAsync(string directoryPath)
+    {
+        // 前回の読み込みをキャンセル
+        _loadCancellation?.Cancel();
+        _loadCancellation = new CancellationTokenSource();
+        var token = _loadCancellation.Token;
+
+        fileListView.Items.Clear();
+        fileListView.Cursor = Cursors.WaitCursor;  // 読み込み中カーソル
+
+        try
+        {
+            // バックグラウンドでファイル情報を取得
+            var fileItems = await Task.Run(() =>
+            {
+                var items = new List<ListViewItem>();
+
+                foreach (var file in Directory.GetFiles(directoryPath))
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    var fileInfo = new FileInfo(file);
+                    var item = new ListViewItem(fileInfo.Name)
+                    {
+                        ImageIndex = 1,
+                        Tag = fileInfo.FullName
+                    };
+
+                    item.SubItems.Add("");  // 変更後ファイル名
+                    item.SubItems.Add(FormatFileSize(fileInfo.Length));
+                    item.SubItems.Add(GetFileType(fileInfo.Extension));
+
+                    items.Add(item);
+                }
+
+                return items;
+            }, token);
+
+            // キャンセルされていなければUIに反映
+            if (!token.IsCancellationRequested)
+            {
+                fileListView.BeginUpdate();  // 描画を一時停止（高速化）
+                fileListView.Items.AddRange(fileItems.ToArray());
+                fileListView.EndUpdate();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // キャンセルされた場合は何もしない
+        }
+        catch (UnauthorizedAccessException) { }
+        catch (IOException) { }
+        finally
+        {
+            fileListView.Cursor = Cursors.Default;
+        }
+    }
+
+    private void LoadFilesToListView(string directoryPath)
+    {
+        fileListView.Items.Clear();
+
+        try
+        {
+            foreach (var file in Directory.GetFiles(directoryPath))
+            {
+                var fileInfo = new FileInfo(file);
+                var item = new ListViewItem(fileInfo.Name)
+                {
+                    ImageIndex = 1,  // ファイルアイコン
+                    Tag = fileInfo.FullName
+                };
+
+                item.SubItems.Add("");  // 変更後ファイル名（空欄）
+                item.SubItems.Add(FormatFileSize(fileInfo.Length));
+                item.SubItems.Add(GetFileType(fileInfo.Extension));
+
+                fileListView.Items.Add(item);
+            }
+        }
+        catch (UnauthorizedAccessException) { }
+        catch (IOException) { }
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024} KB";
+        if (bytes < 1024 * 1024 * 1024) return $"{bytes / 1024 / 1024} MB";
+        return $"{bytes / 1024 / 1024 / 1024} GB";
+    }
+
+    private string GetFileType(string extension)
+    {
+        if (string.IsNullOrEmpty(extension)) return "ファイル";
+        return $"{extension.ToUpper().TrimStart('.')} ファイル";
+    }
+    
+    
     
 }
