@@ -47,7 +47,10 @@ public partial class Form1 : Form
                 ImageIndex = 0,
                 SelectedImageIndex = 0
             };
-            desktopNode.Nodes.Add(""); // 展開可能にするためのダミー
+            if (HasSubdirectories(desktopPath))
+            {
+                desktopNode.Nodes.Add("");
+            }
             treeView1.Nodes.Add(desktopNode);
         }
         // ドライブを追加
@@ -59,7 +62,10 @@ public partial class Form1 : Form
                 ImageIndex = 0,
                 SelectedImageIndex = 0
             };
-            node.Nodes.Add("");  // 展開可能にするためのダミー
+            if (HasSubdirectories(drive.RootDirectory.FullName))
+            {
+                node.Nodes.Add("");
+            }
             treeView1.Nodes.Add(node);
         }
 
@@ -122,6 +128,7 @@ public partial class Form1 : Form
         DestroyIcon(shinfo.hIcon);  // リソース解放
         return icon;
     }
+
     private void TreeView_BeforeExpand(object? sender, TreeViewCancelEventArgs e)
     {
         var node = e.Node;
@@ -143,22 +150,15 @@ public partial class Form1 : Form
                         ImageIndex = 0,
                         SelectedImageIndex = 0
                     };
-                    child.Nodes.Add("");
+
+                    // サブフォルダがある場合のみダミーを追加
+                    if (HasSubdirectories(dir))
+                    {
+                        child.Nodes.Add("");
+                    }
+
                     node.Nodes.Add(child);
                 }
-
-                // treeviewにはファイルはいったんなし
-                /*
-                foreach (var file in Directory.GetFiles(path))
-                {
-                    node.Nodes.Add(new TreeNode(Path.GetFileName(file))
-                    {
-                        Tag = file,
-                        ImageIndex = 1,
-                        SelectedImageIndex = 1
-                    });
-                }
-                */
             }
             catch (UnauthorizedAccessException) { }
         }
@@ -270,7 +270,20 @@ public partial class Form1 : Form
         if (string.IsNullOrEmpty(extension)) return "ファイル";
         return $"{extension.ToUpper().TrimStart('.')} ファイル";
     }
-    
-    
-    
+
+    private bool HasSubdirectories(string path)
+    {
+        try
+        {
+            return Directory.EnumerateDirectories(path).Any();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
 }
