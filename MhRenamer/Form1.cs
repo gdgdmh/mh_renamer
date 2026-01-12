@@ -8,12 +8,12 @@ public partial class Form1 : Form
     private static extern IntPtr SHGetFileInfo(
         string pszPath,
         uint dwFileAttributes,
-        ref SHFILEINFO psfi,
+        ref Shfileinfo psfi,
         uint cbFileInfo,
         uint uFlags);
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    private struct SHFILEINFO
+    private struct Shfileinfo
     {
         public IntPtr hIcon;
         public int iIcon;
@@ -24,11 +24,11 @@ public partial class Form1 : Form
         public string szTypeName;
     }
 
-    private const uint SHGFI_ICON = 0x100;
-    private const uint SHGFI_SMALLICON = 0x1;
-    private const uint SHGFI_USEFILEATTRIBUTES = 0x10;
-    private const uint FILE_ATTRIBUTE_DIRECTORY = 0x10;
-    private const uint FILE_ATTRIBUTE_NORMAL = 0x80;
+    private const uint ShgfiIcon = 0x100;
+    private const uint ShgfiSmallicon = 0x1;
+    private const uint ShgfiUsefileattributes = 0x10;
+    private const uint FileAttributeDirectory = 0x10;
+    private const uint FileAttributeNormal = 0x80;
 
     public Form1()
     {
@@ -80,7 +80,7 @@ public partial class Form1 : Form
         fileListView.Columns.Add("サイズ", 80, HorizontalAlignment.Right);
         fileListView.Columns.Add("ファイルの種類", 100);
         
-        
+        this.Load += (s, e) => ApplyTheme(true);
     }
 
     private ImageList CreateImageList()
@@ -90,14 +90,14 @@ public partial class Form1 : Form
         imageList.ColorDepth = ColorDepth.Depth32Bit;
 
         // フォルダアイコンを取得
-        var folderIcon = GetSystemIcon(FILE_ATTRIBUTE_DIRECTORY);
+        var folderIcon = GetSystemIcon(FileAttributeDirectory);
         if (folderIcon != null)
         {
             imageList.Images.Add(folderIcon);  // index 0: フォルダ
         }
 
         // ファイルアイコンを取得
-        var fileIcon = GetSystemIcon(FILE_ATTRIBUTE_NORMAL);
+        var fileIcon = GetSystemIcon(FileAttributeNormal);
         if (fileIcon != null)
         {
             imageList.Images.Add(fileIcon);  // index 1: ファイル
@@ -106,18 +106,19 @@ public partial class Form1 : Form
         return imageList;
     }
     
+    // システムアイコンの取得
     [DllImport("user32.dll")]
     private static extern bool DestroyIcon(IntPtr hIcon);
 
     private static Icon? GetSystemIcon(uint fileAttribute)
     {
-        var shinfo = new SHFILEINFO();
+        var shinfo = new Shfileinfo();
         var result = SHGetFileInfo(
             "dummy",  // ダミーパス（属性で判断させる）
             fileAttribute,
             ref shinfo,
             (uint)Marshal.SizeOf(shinfo),
-            SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+            ShgfiIcon | ShgfiSmallicon | ShgfiUsefileattributes);
 
         if (result == IntPtr.Zero || shinfo.hIcon == IntPtr.Zero)
         {
@@ -286,4 +287,37 @@ public partial class Form1 : Form
             return false;
         }
     }
+
+    // Win32 API（タイトルバーのダークモード用）
+    [DllImport("dwmapi.dll", PreserveSig = true)]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+    private bool _isDarkMode = false;
+
+    // テーマの適用(ダークモード)
+    private void ApplyTheme(bool darkMode)
+    {
+        _isDarkMode = darkMode;
+        var theme = darkMode ? AppTheme.Dark : AppTheme.Light;
+
+        // フォーム
+        this.BackColor = theme.BackColor;
+        this.ForeColor = theme.ForeColor;
+
+        // タイトルバーのダークモード（Windows 10 20H1以降）
+        int useDarkMode = darkMode ? 1 : 0;
+        DwmSetWindowAttribute(this.Handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref useDarkMode, sizeof(int));
+
+        // TreeView
+        treeView1.BackColor = theme.ControlBackColor;
+        treeView1.ForeColor = theme.ControlForeColor;
+
+        // ListView
+        fileListView.BackColor = theme.ControlBackColor;
+        fileListView.ForeColor = theme.ControlForeColor;
+
+        // 再描画
+        this.Refresh();
+    }    
+    
 }
