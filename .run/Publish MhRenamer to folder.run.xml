@@ -1,0 +1,6 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish MhRenamer to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" delete_existing_files="true" platform="Any CPU" produce_single_file="true" self_contained="true" target_folder="$PROJECT_DIR$/MhRenamer/bin/Release/net10.0-windows/publish" target_framework="net10.0-windows" uuid_high="4771201855637113427" uuid_low="-9123375571800006226" />
+    <method v="2" />
+  </configuration>
+</component>
