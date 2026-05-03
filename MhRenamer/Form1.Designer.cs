@@ -107,7 +107,7 @@ partial class Form1
         defaultAllSelectCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
         defaultAllSelectCheckBox.Location = new System.Drawing.Point(1181, 390);
         defaultAllSelectCheckBox.Name = "defaultAllSelectCheckBox";
-        defaultAllSelectCheckBox.Size = new System.Drawing.Size(104, 24);
+        defaultAllSelectCheckBox.Size = new System.Drawing.Size(127, 24);
         defaultAllSelectCheckBox.TabIndex = 8;
         defaultAllSelectCheckBox.Text = "デフォルトで全選択";
         defaultAllSelectCheckBox.UseVisualStyleBackColor = true;

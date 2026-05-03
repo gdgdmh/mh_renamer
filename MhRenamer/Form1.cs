@@ -239,6 +239,12 @@ public partial class Form1 : Form
                 fileListView.BeginUpdate();  // 描画を一時停止（高速化）
                 fileListView.Items.AddRange(fileItems.ToArray());
                 fileListView.EndUpdate();
+
+                // デフォルト全選択が有効なら全選択
+                if (defaultAllSelectCheckBox.Checked)
+                {
+                    fileListView.Items.Cast<ListViewItem>().ToList().ForEach(item => item.Selected = true);
+                }
             }
         }
         catch (OperationCanceledException)
