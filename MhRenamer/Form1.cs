@@ -73,12 +73,24 @@ public partial class Form1 : Form
         fileListView.View = View.Details;   // 詳細表示モード
         fileListView.FullRowSelect = true; // 行全体を選択
         fileListView.GridLines = true;      // グリッド線を表示
+        fileListView.MultiSelect = true;    // 複数選択可能
         fileListView.SmallImageList = CreateImageList();
 
         fileListView.Columns.Add("名前", 200);
         fileListView.Columns.Add("変更後ファイル名", 200);
         fileListView.Columns.Add("サイズ", 80, HorizontalAlignment.Right);
         fileListView.Columns.Add("ファイルの種類", 100);
+        
+        // 選択変更・設定変更でプレビューを更新
+        fileListView.ItemSelectionChanged += (s, e) => UpdateRenamePreview();
+        startNumNumericUpDown.ValueChanged += (s, e) => UpdateRenamePreview();
+        digitNumericUpDown1.ValueChanged += (s, e) => UpdateRenamePreview();
+        
+        // 全選択ボタン
+        allSelectButton.Click += (s, e) => fileListView.Items.Cast<ListViewItem>().ToList().ForEach(item => item.Selected = true);
+        
+        // リネームボタン
+        renameButton.Click += (s, e) => ExecuteRename();
         
         this.Load += (s, e) => ApplyTheme(true);
     }
@@ -167,9 +179,18 @@ public partial class Form1 : Form
 
     private async void TreeView_AfterSelect(object? sender, TreeViewEventArgs e)
     {
-        if (e.Node?.Tag is string path && Directory.Exists(path))
+        try
         {
-            await LoadFilesToListViewAsync(path);
+            if (e.Node?.Tag is string path && Directory.Exists(path))
+            {
+                await LoadFilesToListViewAsync(path);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("エラーが発生しました: " + ex.Message, "エラー", MessageBoxButtons.OK);
+            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.StackTrace);
         }
     }
 
@@ -288,6 +309,145 @@ public partial class Form1 : Form
         }
     }
 
+    private void UpdateRenamePreview()
+    {
+        var startNum = (int)startNumNumericUpDown.Value;
+        var digits   = (int)digitNumericUpDown1.Value;
+
+        // 全行のプレビューをいったんクリア
+        foreach (ListViewItem item in fileListView.Items)
+        {
+            item.SubItems[1].Text = "";
+        }
+
+        // 選択行を表示順（Index順）で取得し連番を設定
+        var selectedItems = fileListView.SelectedItems
+            .Cast<ListViewItem>()
+            .OrderBy(item => item.Index)
+            .ToList();
+
+        for (int i = 0; i < selectedItems.Count; i++)
+        {
+            var num = startNum + i;
+            selectedItems[i].SubItems[1].Text = num.ToString().PadLeft(digits, '0');
+        }
+    }
+
+    // リネーム実行
+    private void ExecuteRename()
+    {
+        // 変更後ファイル名が設定されている行のみ対象
+        var targets = fileListView.SelectedItems
+            .Cast<ListViewItem>()
+            .Where(item => !string.IsNullOrEmpty(item.SubItems[1].Text))
+            .OrderBy(item => item.Index)
+            .ToList();
+
+        if (targets.Count == 0)
+        {
+            MessageBox.Show("リネーム対象がありません。\nファイルを選択してください。",
+                "確認", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        // リネーム計画を作成（元パス → 新パス）
+        var renamePlan = new List<(string OldPath, string NewPath, string NewName)>();
+
+        foreach (var item in targets)
+        {
+            var oldPath   = item.Tag as string;
+            var newBaseName = item.SubItems[1].Text;
+
+            if (string.IsNullOrEmpty(oldPath)) continue;
+
+            var dir       = Path.GetDirectoryName(oldPath) ?? "";
+            var extension = Path.GetExtension(oldPath);       // 元の拡張子をそのまま使用
+            var newName   = newBaseName + extension;
+            var newPath   = Path.Combine(dir, newName);
+
+            renamePlan.Add((oldPath, newPath, newName));
+        }
+
+        // ── 事前チェック1: 変更後ファイル名の重複（計画内での重複） ──
+        var duplicatesInPlan = renamePlan
+            .GroupBy(r => r.NewPath, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicatesInPlan.Count > 0)
+        {
+            var names = string.Join("\n", duplicatesInPlan.Select(p => Path.GetFileName(p)));
+            MessageBox.Show(
+                $"リネーム後に名前が重複するファイルがあります。処理を中断します。\n\n{names}",
+                "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        // ── 事前チェック2: 既存ファイルとの衝突 ──
+        // （元のファイル自身への上書きは除外してチェック）
+        var oldPathSet = new HashSet<string>(
+            renamePlan.Select(r => r.OldPath), StringComparer.OrdinalIgnoreCase);
+
+        var conflicts = renamePlan
+            .Where(r => File.Exists(r.NewPath) && !oldPathSet.Contains(r.NewPath))
+            .Select(r => r.NewName)
+            .ToList();
+
+        if (conflicts.Count > 0)
+        {
+            var names = string.Join("\n", conflicts);
+            MessageBox.Show(
+                $"以下のファイルは既に存在するためリネームできません。処理を中断します。\n\n{names}",
+                "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        // ── リネーム実行 ──
+        var renamedItems = new List<(ListViewItem Item, string NewName)>();
+
+        foreach (var (oldPath, newPath, newName) in renamePlan)
+        {
+            try
+            {
+                File.Move(oldPath, newPath);
+
+                // 対応する ListViewItem を記録（後でUI更新用）
+                var item = fileListView.Items
+                    .Cast<ListViewItem>()
+                    .FirstOrDefault(i => string.Equals(i.Tag as string, oldPath,
+                        StringComparison.OrdinalIgnoreCase));
+
+                if (item != null)
+                {
+                    renamedItems.Add((item, newName));
+                }
+            }
+            catch (Exception ex)
+            {
+                // 失敗したファイル名とエラー内容を表示して中断
+                MessageBox.Show(
+                    $"リネームに失敗しました。処理を中断します。\n\nファイル: {Path.GetFileName(oldPath)}\nエラー: {ex.Message}",
+                    "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
+
+        // ── UI更新：成功したアイテムのみ反映 ──
+        fileListView.BeginUpdate();
+        foreach (var (item, newName) in renamedItems)
+        {
+            var dir     = Path.GetDirectoryName(item.Tag as string) ?? "";
+            var newPath = Path.Combine(dir, newName);
+
+            item.Text            = newName;        // 名前列
+            item.SubItems[1].Text = "";            // 変更後ファイル名列をクリア
+            item.Tag             = newPath;        // Tagのパスも更新
+        }
+        fileListView.EndUpdate();
+    }
+
+
     // Win32 API（タイトルバーのダークモード用）
     [DllImport("dwmapi.dll", PreserveSig = true)]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
@@ -318,6 +478,5 @@ public partial class Form1 : Form
 
         // 再描画
         this.Refresh();
-    }    
-    
+    }
 }

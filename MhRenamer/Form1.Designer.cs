@@ -31,6 +31,16 @@ partial class Form1
     {
         treeView1 = new System.Windows.Forms.TreeView();
         fileListView = new System.Windows.Forms.ListView();
+        renameSettingLabel = new System.Windows.Forms.Label();
+        label1 = new System.Windows.Forms.Label();
+        digitNumericUpDown1 = new System.Windows.Forms.NumericUpDown();
+        startNumNumericUpDown = new System.Windows.Forms.NumericUpDown();
+        fixtildeCheckBox = new System.Windows.Forms.CheckBox();
+        defaultAllSelectCheckBox = new System.Windows.Forms.CheckBox();
+        renameButton = new System.Windows.Forms.Button();
+        allSelectButton = new System.Windows.Forms.Button();
+        ((System.ComponentModel.ISupportInitialize)digitNumericUpDown1).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)startNumNumericUpDown).BeginInit();
         SuspendLayout();
         // 
         // treeView1
@@ -42,22 +52,117 @@ partial class Form1
         // 
         // fileListView
         // 
-        fileListView.Location = new System.Drawing.Point(291, 12);
+        fileListView.Location = new System.Drawing.Point(296, 12);
         fileListView.Name = "fileListView";
-        fileListView.Size = new System.Drawing.Size(478, 384);
+        fileListView.Size = new System.Drawing.Size(803, 481);
         fileListView.TabIndex = 1;
         fileListView.UseCompatibleStateImageBehavior = false;
+        // 
+        // renameSettingLabel
+        // 
+        renameSettingLabel.Font = new System.Drawing.Font("Yu Gothic UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)128));
+        renameSettingLabel.Location = new System.Drawing.Point(1165, 70);
+        renameSettingLabel.Name = "renameSettingLabel";
+        renameSettingLabel.Size = new System.Drawing.Size(100, 23);
+        renameSettingLabel.TabIndex = 2;
+        renameSettingLabel.Text = "リネーム設定";
+        // 
+        // label1
+        // 
+        label1.Location = new System.Drawing.Point(1105, 109);
+        label1.Name = "label1";
+        label1.Size = new System.Drawing.Size(54, 23);
+        label1.TabIndex = 4;
+        label1.Text = "開始/桁";
+        // 
+        // digitNumericUpDown1
+        // 
+        digitNumericUpDown1.Location = new System.Drawing.Point(1291, 107);
+        digitNumericUpDown1.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+        digitNumericUpDown1.Name = "digitNumericUpDown1";
+        digitNumericUpDown1.Size = new System.Drawing.Size(60, 23);
+        digitNumericUpDown1.TabIndex = 5;
+        digitNumericUpDown1.Value = new decimal(new int[] { 1, 0, 0, 0 });
+        // 
+        // startNumNumericUpDown
+        // 
+        startNumNumericUpDown.Location = new System.Drawing.Point(1165, 106);
+        startNumNumericUpDown.Maximum = new decimal(new int[] { 10000000, 0, 0, 0 });
+        startNumNumericUpDown.Name = "startNumNumericUpDown";
+        startNumNumericUpDown.Size = new System.Drawing.Size(120, 23);
+        startNumNumericUpDown.TabIndex = 6;
+        // 
+        // fixtildeCheckBox
+        // 
+        fixtildeCheckBox.Location = new System.Drawing.Point(1181, 344);
+        fixtildeCheckBox.Name = "fixtildeCheckBox";
+        fixtildeCheckBox.Size = new System.Drawing.Size(104, 24);
+        fixtildeCheckBox.TabIndex = 7;
+        fixtildeCheckBox.Text = "波線修正";
+        fixtildeCheckBox.UseVisualStyleBackColor = true;
+        // 
+        // defaultAllSelectCheckBox
+        // 
+        defaultAllSelectCheckBox.Checked = true;
+        defaultAllSelectCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+        defaultAllSelectCheckBox.Location = new System.Drawing.Point(1181, 390);
+        defaultAllSelectCheckBox.Name = "defaultAllSelectCheckBox";
+        defaultAllSelectCheckBox.Size = new System.Drawing.Size(104, 24);
+        defaultAllSelectCheckBox.TabIndex = 8;
+        defaultAllSelectCheckBox.Text = "デフォルトで全選択";
+        defaultAllSelectCheckBox.UseVisualStyleBackColor = true;
+        // 
+        // renameButton
+        // 
+        renameButton.ForeColor = System.Drawing.Color.Red;
+        renameButton.Location = new System.Drawing.Point(1115, 443);
+        renameButton.Name = "renameButton";
+        renameButton.Size = new System.Drawing.Size(250, 50);
+        renameButton.TabIndex = 9;
+        renameButton.Text = "リネーム";
+        renameButton.UseVisualStyleBackColor = true;
+        // 
+        // allSelectButton
+        // 
+        allSelectButton.ForeColor = System.Drawing.Color.Red;
+        allSelectButton.Location = new System.Drawing.Point(1165, 25);
+        allSelectButton.Name = "allSelectButton";
+        allSelectButton.Size = new System.Drawing.Size(90, 30);
+        allSelectButton.TabIndex = 10;
+        allSelectButton.Text = "全選択";
+        allSelectButton.UseVisualStyleBackColor = true;
         // 
         // Form1
         // 
         AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
         AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        ClientSize = new System.Drawing.Size(950, 450);
+        ClientSize = new System.Drawing.Size(1407, 537);
+        Controls.Add(allSelectButton);
+        Controls.Add(renameButton);
+        Controls.Add(defaultAllSelectCheckBox);
+        Controls.Add(fixtildeCheckBox);
+        Controls.Add(startNumNumericUpDown);
+        Controls.Add(digitNumericUpDown1);
+        Controls.Add(label1);
+        Controls.Add(renameSettingLabel);
         Controls.Add(fileListView);
         Controls.Add(treeView1);
         Text = "Form1";
+        ((System.ComponentModel.ISupportInitialize)digitNumericUpDown1).EndInit();
+        ((System.ComponentModel.ISupportInitialize)startNumNumericUpDown).EndInit();
         ResumeLayout(false);
     }
+
+    private System.Windows.Forms.Button allSelectButton;
+
+    private System.Windows.Forms.Label label1;
+    private System.Windows.Forms.NumericUpDown digitNumericUpDown1;
+    private System.Windows.Forms.NumericUpDown startNumNumericUpDown;
+    private System.Windows.Forms.CheckBox fixtildeCheckBox;
+    private System.Windows.Forms.CheckBox defaultAllSelectCheckBox;
+    private System.Windows.Forms.Button renameButton;
+
+    private System.Windows.Forms.Label renameSettingLabel;
 
     private System.Windows.Forms.ListView fileListView;
 
