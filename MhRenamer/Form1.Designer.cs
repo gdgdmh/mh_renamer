@@ -35,7 +35,6 @@ partial class Form1
         label1 = new System.Windows.Forms.Label();
         digitNumericUpDown1 = new System.Windows.Forms.NumericUpDown();
         startNumNumericUpDown = new System.Windows.Forms.NumericUpDown();
-        fixtildeCheckBox = new System.Windows.Forms.CheckBox();
         defaultAllSelectCheckBox = new System.Windows.Forms.CheckBox();
         renameButton = new System.Windows.Forms.Button();
         allSelectButton = new System.Windows.Forms.Button();
@@ -47,7 +46,7 @@ partial class Form1
         // 
         treeView1.Location = new System.Drawing.Point(12, 12);
         treeView1.Name = "treeView1";
-        treeView1.Size = new System.Drawing.Size(253, 286);
+        treeView1.Size = new System.Drawing.Size(253, 481);
         treeView1.TabIndex = 0;
         // 
         // fileListView
@@ -92,15 +91,6 @@ partial class Form1
         startNumNumericUpDown.Size = new System.Drawing.Size(120, 23);
         startNumNumericUpDown.TabIndex = 6;
         // 
-        // fixtildeCheckBox
-        // 
-        fixtildeCheckBox.Location = new System.Drawing.Point(1181, 344);
-        fixtildeCheckBox.Name = "fixtildeCheckBox";
-        fixtildeCheckBox.Size = new System.Drawing.Size(104, 24);
-        fixtildeCheckBox.TabIndex = 7;
-        fixtildeCheckBox.Text = "波線修正";
-        fixtildeCheckBox.UseVisualStyleBackColor = true;
-        // 
         // defaultAllSelectCheckBox
         // 
         defaultAllSelectCheckBox.Checked = true;
@@ -140,7 +130,6 @@ partial class Form1
         Controls.Add(allSelectButton);
         Controls.Add(renameButton);
         Controls.Add(defaultAllSelectCheckBox);
-        Controls.Add(fixtildeCheckBox);
         Controls.Add(startNumNumericUpDown);
         Controls.Add(digitNumericUpDown1);
         Controls.Add(label1);
@@ -158,7 +147,6 @@ partial class Form1
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.NumericUpDown digitNumericUpDown1;
     private System.Windows.Forms.NumericUpDown startNumNumericUpDown;
-    private System.Windows.Forms.CheckBox fixtildeCheckBox;
     private System.Windows.Forms.CheckBox defaultAllSelectCheckBox;
     private System.Windows.Forms.Button renameButton;
 

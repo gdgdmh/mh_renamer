@@ -30,6 +30,8 @@ public partial class Form1 : Form
     private const uint FileAttributeDirectory = 0x10;
     private const uint FileAttributeNormal = 0x80;
 
+    private string _currentDirectoryPath = "";
+
     public Form1()
     {
         InitializeComponent();
@@ -92,7 +94,114 @@ public partial class Form1 : Form
         // リネームボタン
         renameButton.Click += (s, e) => ExecuteRename();
         
-        this.Load += (s, e) => ApplyTheme(true);
+        this.Load += Form1_Load;
+        this.FormClosing += Form1_FormClosing;
+    }
+    
+    // ロード後
+    private async void Form1_Load(object? sender, EventArgs e)
+    {
+        ApplyTheme(true);
+
+        var config = AppConfigManager.Load();
+
+        // コントロールの値を復元
+        defaultAllSelectCheckBox.Checked = config.DefaultAllSelect;
+        startNumNumericUpDown.Value      = Math.Min(config.StartNum, startNumNumericUpDown.Maximum);
+        digitNumericUpDown1.Value        = Math.Max(config.Digits,   digitNumericUpDown1.Minimum);
+
+        // 復元対象パスを決定（存在しなければデスクトップ）
+        var restorePath = Directory.Exists(config.LastDirectory)
+            ? config.LastDirectory
+            : Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+        // TreeViewのハイライトだけ更新（AfterSelectは発火させない）
+        HighlightTreeViewNode(restorePath);
+
+        // ファイル一覧は直接読み込む（保存していた深いパスをそのまま渡す）
+        await LoadFilesToListViewAsync(restorePath);
+    }
+
+private void HighlightTreeViewNode(string targetPath)
+{
+    treeView1.AfterSelect -= TreeView_AfterSelect;
+
+    try
+    {
+        // パスをセグメントに分解
+        // 例: "C:\Users\foo\Documents" → ["C:\", "Users", "foo", "Documents"]
+        var segments = new List<string>();
+        var current  = targetPath;
+        while (!string.IsNullOrEmpty(current))
+        {
+            segments.Insert(0, current);
+            var parent = Path.GetDirectoryName(current);
+            if (parent == current || parent == null) break;
+            current = parent;
+        }
+
+        // ルートノードを探す
+        TreeNode? matchNode = null;
+        foreach (TreeNode node in treeView1.Nodes)
+        {
+            var nodePath = node.Tag as string ?? "";
+            if (string.Equals(nodePath, segments[0], StringComparison.OrdinalIgnoreCase) ||
+                targetPath.StartsWith(nodePath, StringComparison.OrdinalIgnoreCase))
+            {
+                matchNode = node;
+                break;
+            }
+        }
+
+        if (matchNode == null)
+        {
+            // マッチなし → デスクトップノードを選択
+            if (treeView1.Nodes.Count > 0)
+                treeView1.SelectedNode = treeView1.Nodes[0];
+            return;
+        }
+
+        // ルートより深いパスを順番に展開して辿る
+        foreach (var segment in segments.Skip(1))
+        {
+            // ダミーノードがあれば展開して子を読み込む
+            if (matchNode.Nodes.Count == 1 && matchNode.Nodes[0].Text == "")
+            {
+                matchNode.Expand();  // BeforeExpand が発火して子ノードが読み込まれる
+            }
+
+            var nextNode = matchNode.Nodes
+                .Cast<TreeNode>()
+                .FirstOrDefault(n => string.Equals(
+                    n.Tag as string, segment, StringComparison.OrdinalIgnoreCase));
+
+            if (nextNode == null)
+            {
+                // 途中で見つからなければ デスクトップにフォールバック
+                matchNode = treeView1.Nodes[0];
+                break;
+            }
+            matchNode = nextNode;
+        }
+
+        treeView1.SelectedNode = matchNode;
+        treeView1.SelectedNode.EnsureVisible();  // スクロールして見える位置に移動
+    }
+    finally
+    {
+        treeView1.AfterSelect += TreeView_AfterSelect;
+    }
+}    
+    // アプリケーション終了時
+    private void Form1_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        AppConfigManager.Save(new AppConfig
+        {
+            LastDirectory    = _currentDirectoryPath,
+            DefaultAllSelect = defaultAllSelectCheckBox.Checked,
+            StartNum         = (int)startNumNumericUpDown.Value,
+            Digits           = (int)digitNumericUpDown1.Value,
+        });
     }
 
     private ImageList CreateImageList()
@@ -197,6 +306,8 @@ public partial class Form1 : Form
     private CancellationTokenSource? _loadCancellation;
     private async Task LoadFilesToListViewAsync(string directoryPath)
     {
+        _currentDirectoryPath = directoryPath;
+    
         // 前回の読み込みをキャンセル
         _loadCancellation?.Cancel();
         _loadCancellation = new CancellationTokenSource();
