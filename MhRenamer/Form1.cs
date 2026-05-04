@@ -323,6 +323,26 @@ private void HighlightTreeViewNode(string targetPath)
             {
                 var items = new List<ListViewItem>();
 
+                // フォルダ
+                foreach (var dir in Directory.GetDirectories(directoryPath))
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    var dirInfo = new DirectoryInfo(dir);
+                    var item = new ListViewItem(dirInfo.Name)
+                    {
+                        ImageIndex = 0,  // フォルダアイコン
+                        Tag = dirInfo.FullName
+                    };
+
+                    item.SubItems.Add("");   // 変更後ファイル名
+                    item.SubItems.Add("");   // サイズ（フォルダは空欄）
+                    item.SubItems.Add("フォルダー");
+
+                    items.Add(item);
+                }
+
+                // ファイル
                 foreach (var file in Directory.GetFiles(directoryPath))
                 {
                     token.ThrowIfCancellationRequested();
@@ -507,7 +527,8 @@ private void HighlightTreeViewNode(string targetPath)
             renamePlan.Select(r => r.OldPath), StringComparer.OrdinalIgnoreCase);
 
         var conflicts = renamePlan
-            .Where(r => File.Exists(r.NewPath) && !oldPathSet.Contains(r.NewPath))
+            .Where(r => (File.Exists(r.NewPath) || Directory.Exists(r.NewPath))  // ← Directory.Exists を追加
+                        && !oldPathSet.Contains(r.NewPath))
             .Select(r => r.NewName)
             .ToList();
 
@@ -527,7 +548,10 @@ private void HighlightTreeViewNode(string targetPath)
         {
             try
             {
-                File.Move(oldPath, newPath);
+                if (Directory.Exists(oldPath))
+                    Directory.Move(oldPath, newPath);
+                else
+                    File.Move(oldPath, newPath);
 
                 // 対応する ListViewItem を記録（後でUI更新用）
                 var item = fileListView.Items

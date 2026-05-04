@@ -47,21 +47,21 @@ partial class Form1
         // 
         treeView1.Location = new System.Drawing.Point(12, 12);
         treeView1.Name = "treeView1";
-        treeView1.Size = new System.Drawing.Size(253, 481);
+        treeView1.Size = new System.Drawing.Size(340, 481);
         treeView1.TabIndex = 0;
         // 
         // fileListView
         // 
-        fileListView.Location = new System.Drawing.Point(296, 12);
+        fileListView.Location = new System.Drawing.Point(358, 12);
         fileListView.Name = "fileListView";
-        fileListView.Size = new System.Drawing.Size(803, 481);
+        fileListView.Size = new System.Drawing.Size(1038, 481);
         fileListView.TabIndex = 1;
         fileListView.UseCompatibleStateImageBehavior = false;
         // 
         // renameSettingLabel
         // 
         renameSettingLabel.Font = new System.Drawing.Font("Yu Gothic UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)128));
-        renameSettingLabel.Location = new System.Drawing.Point(1165, 70);
+        renameSettingLabel.Location = new System.Drawing.Point(1462, 57);
         renameSettingLabel.Name = "renameSettingLabel";
         renameSettingLabel.Size = new System.Drawing.Size(100, 23);
         renameSettingLabel.TabIndex = 2;
@@ -69,7 +69,7 @@ partial class Form1
         // 
         // label1
         // 
-        label1.Location = new System.Drawing.Point(1105, 109);
+        label1.Location = new System.Drawing.Point(1402, 96);
         label1.Name = "label1";
         label1.Size = new System.Drawing.Size(54, 23);
         label1.TabIndex = 4;
@@ -77,7 +77,7 @@ partial class Form1
         // 
         // digitNumericUpDown1
         // 
-        digitNumericUpDown1.Location = new System.Drawing.Point(1291, 107);
+        digitNumericUpDown1.Location = new System.Drawing.Point(1588, 94);
         digitNumericUpDown1.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
         digitNumericUpDown1.Name = "digitNumericUpDown1";
         digitNumericUpDown1.Size = new System.Drawing.Size(60, 23);
@@ -86,7 +86,7 @@ partial class Form1
         // 
         // startNumNumericUpDown
         // 
-        startNumNumericUpDown.Location = new System.Drawing.Point(1165, 106);
+        startNumNumericUpDown.Location = new System.Drawing.Point(1462, 93);
         startNumNumericUpDown.Maximum = new decimal(new int[] { 10000000, 0, 0, 0 });
         startNumNumericUpDown.Name = "startNumNumericUpDown";
         startNumNumericUpDown.Size = new System.Drawing.Size(120, 23);
@@ -96,7 +96,7 @@ partial class Form1
         // 
         defaultAllSelectCheckBox.Checked = true;
         defaultAllSelectCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-        defaultAllSelectCheckBox.Location = new System.Drawing.Point(1181, 390);
+        defaultAllSelectCheckBox.Location = new System.Drawing.Point(1478, 377);
         defaultAllSelectCheckBox.Name = "defaultAllSelectCheckBox";
         defaultAllSelectCheckBox.Size = new System.Drawing.Size(127, 24);
         defaultAllSelectCheckBox.TabIndex = 8;
@@ -106,7 +106,7 @@ partial class Form1
         // renameButton
         // 
         renameButton.ForeColor = System.Drawing.Color.Red;
-        renameButton.Location = new System.Drawing.Point(1115, 443);
+        renameButton.Location = new System.Drawing.Point(1412, 430);
         renameButton.Name = "renameButton";
         renameButton.Size = new System.Drawing.Size(250, 50);
         renameButton.TabIndex = 9;
@@ -116,7 +116,7 @@ partial class Form1
         // allSelectButton
         // 
         allSelectButton.ForeColor = System.Drawing.Color.Red;
-        allSelectButton.Location = new System.Drawing.Point(1165, 25);
+        allSelectButton.Location = new System.Drawing.Point(1462, 12);
         allSelectButton.Name = "allSelectButton";
         allSelectButton.Size = new System.Drawing.Size(90, 30);
         allSelectButton.TabIndex = 10;
@@ -127,7 +127,7 @@ partial class Form1
         // 
         AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
         AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        ClientSize = new System.Drawing.Size(1407, 537);
+        ClientSize = new System.Drawing.Size(1684, 661);
         Controls.Add(allSelectButton);
         Controls.Add(renameButton);
         Controls.Add(defaultAllSelectCheckBox);
