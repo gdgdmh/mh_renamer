@@ -78,7 +78,7 @@ public partial class Form1 : Form
         fileListView.MultiSelect = true;    // 複数選択可能
         fileListView.SmallImageList = CreateImageList();
 
-        fileListView.Columns.Add("名前", 200);
+        fileListView.Columns.Add("名前", 600);
         fileListView.Columns.Add("変更後ファイル名", 200);
         fileListView.Columns.Add("サイズ", 80, HorizontalAlignment.Right);
         fileListView.Columns.Add("ファイルの種類", 100);
