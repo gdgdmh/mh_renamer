@@ -29,6 +29,7 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
+        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
         treeView1 = new System.Windows.Forms.TreeView();
         fileListView = new System.Windows.Forms.ListView();
         renameSettingLabel = new System.Windows.Forms.Label();
@@ -136,7 +137,8 @@ partial class Form1
         Controls.Add(renameSettingLabel);
         Controls.Add(fileListView);
         Controls.Add(treeView1);
-        Text = "Form1";
+        Icon = ((System.Drawing.Icon)resources.GetObject("$this.Icon"));
+        Text = "MhRenamer";
         ((System.ComponentModel.ISupportInitialize)digitNumericUpDown1).EndInit();
         ((System.ComponentModel.ISupportInitialize)startNumNumericUpDown).EndInit();
         ResumeLayout(false);
