@@ -86,7 +86,9 @@ public partial class Form1 : Form
         // 選択変更・設定変更でプレビューを更新
         fileListView.ItemSelectionChanged += (s, e) => UpdateRenamePreview();
         startNumNumericUpDown.ValueChanged += (s, e) => UpdateRenamePreview();
+        startNumNumericUpDown.TextChanged += (s, e) => UpdateRenamePreview();
         digitNumericUpDown1.ValueChanged += (s, e) => UpdateRenamePreview();
+        digitNumericUpDown1.TextChanged += (s, e) => UpdateRenamePreview();
         
         // 全選択ボタン
         allSelectButton.Click += (s, e) => fileListView.Items.Cast<ListViewItem>().ToList().ForEach(item => item.Selected = true);
@@ -448,8 +450,16 @@ private void HighlightTreeViewNode(string targetPath)
 
     private void UpdateRenamePreview()
     {
-        var startNum = (int)startNumNumericUpDown.Value;
-        var digits   = (int)digitNumericUpDown1.Value;
+        var startNum = int.TryParse(startNumNumericUpDown.Text, out var enteredStartNum) &&
+                       enteredStartNum >= startNumNumericUpDown.Minimum &&
+                       enteredStartNum <= startNumNumericUpDown.Maximum
+            ? enteredStartNum
+            : (int)startNumNumericUpDown.Value;
+        var digits = int.TryParse(digitNumericUpDown1.Text, out var enteredDigits) &&
+                     enteredDigits >= digitNumericUpDown1.Minimum &&
+                     enteredDigits <= digitNumericUpDown1.Maximum
+            ? enteredDigits
+            : (int)digitNumericUpDown1.Value;
 
         // 全行のプレビューをいったんクリア
         foreach (ListViewItem item in fileListView.Items)

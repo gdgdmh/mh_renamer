@@ -45,6 +45,7 @@ partial class Form1
         // 
         // treeView1
         // 
+        treeView1.HideSelection = false;
         treeView1.Location = new System.Drawing.Point(12, 12);
         treeView1.Name = "treeView1";
         treeView1.Size = new System.Drawing.Size(340, 481);
