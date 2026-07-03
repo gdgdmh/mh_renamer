@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MhRenamer", "MhRenamer\MhRenamer.csproj", "{4236B6CF-0CEF-4A53-8163-4241526261AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MhRenamerWpf", "MhRenamerWpf\MhRenamerWpf.csproj", "{F63278B1-4518-4FB8-88D0-11092A7415BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{4236B6CF-0CEF-4A53-8163-4241526261AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4236B6CF-0CEF-4A53-8163-4241526261AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4236B6CF-0CEF-4A53-8163-4241526261AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F63278B1-4518-4FB8-88D0-11092A7415BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F63278B1-4518-4FB8-88D0-11092A7415BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F63278B1-4518-4FB8-88D0-11092A7415BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F63278B1-4518-4FB8-88D0-11092A7415BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
