@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using MhRenamerWpf.Models;
 using MhRenamerWpf.Services;
 
@@ -20,6 +21,7 @@ public partial class MainWindow : Window
     private CancellationTokenSource? _loadCancellation;
     private string _currentDirectoryPath = "";
     private bool _isInitializing;
+    private FrameworkElement? _layoutHost;
 
     public MainWindow()
     {
@@ -35,6 +37,7 @@ public partial class MainWindow : Window
         _isInitializing = true;
 
         var config = AppConfigManager.Load();
+        SetFolderTreeWidth(config.FolderTreeWidth);
         StartNumberTextBox.Text = Math.Clamp(
             config.StartNum,
             MinimumStartNumber,
@@ -65,8 +68,53 @@ public partial class MainWindow : Window
             LastDirectory = _currentDirectoryPath,
             DefaultAllSelect = DefaultAllSelectCheckBox.IsChecked == true,
             StartNum = GetStartNumber(),
-            Digits = GetDigits()
+            Digits = GetDigits(),
+            FolderTreeWidth = FolderTreeColumn.ActualWidth
         });
+    }
+
+    private void LayoutGrid_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_layoutHost is not null)
+        {
+            _layoutHost.SizeChanged -= LayoutHost_SizeChanged;
+        }
+
+        _layoutHost = VisualTreeHelper.GetParent(LayoutGrid) as FrameworkElement;
+        if (_layoutHost is not null)
+        {
+            _layoutHost.SizeChanged += LayoutHost_SizeChanged;
+            UpdateFolderTreeLimit(_layoutHost.ActualWidth);
+        }
+    }
+
+    private void LayoutHost_SizeChanged(object sender, SizeChangedEventArgs e)
+        => UpdateFolderTreeLimit(e.NewSize.Width);
+
+    private void UpdateFolderTreeLimit(double hostWidth)
+    {
+        // 一覧と設定欄の幅を確保し、ツリーを広げた後のウィンドウ縮小にも追従する。
+        var fixedWidth = LayoutGrid.ColumnDefinitions[1].Width.Value
+            + LayoutGrid.ColumnDefinitions[3].Width.Value
+            + LayoutGrid.ColumnDefinitions[4].Width.Value;
+        FolderTreeColumn.MaxWidth = Math.Max(
+            FolderTreeColumn.MinWidth,
+            hostWidth - LayoutGrid.Margin.Left - LayoutGrid.Margin.Right
+                - fixedWidth - FileListColumn.MinWidth);
+        SetFolderTreeWidth(FolderTreeColumn.Width.Value);
+    }
+
+    private void SetFolderTreeWidth(double width)
+    {
+        if (!double.IsFinite(width))
+        {
+            width = 300;
+        }
+
+        FolderTreeColumn.Width = new GridLength(Math.Clamp(
+            width,
+            FolderTreeColumn.MinWidth,
+            FolderTreeColumn.MaxWidth));
     }
 
     private void InitializeFolderTree()

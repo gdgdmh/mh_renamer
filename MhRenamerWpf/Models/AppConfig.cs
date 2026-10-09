@@ -6,4 +6,5 @@ public sealed class AppConfig
     public bool DefaultAllSelect { get; set; } = true;
     public int StartNum { get; set; }
     public int Digits { get; set; } = 5;
+    public double FolderTreeWidth { get; set; } = 300;
 }
