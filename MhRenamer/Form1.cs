@@ -32,6 +32,11 @@ public partial class Form1 : Form
 
     private string _currentDirectoryPath = "";
 
+    private sealed record StagedRename(
+        string OldPath,
+        string TemporaryPath,
+        string NewPath);
+
     public Form1()
     {
         InitializeComponent();
@@ -498,7 +503,7 @@ private void HighlightTreeViewNode(string targetPath)
         }
 
         // リネーム計画を作成（元パス → 新パス）
-        var renamePlan = new List<(string OldPath, string NewPath, string NewName)>();
+        var renamePlan = new List<(ListViewItem Item, string OldPath, string NewPath, string NewName)>();
 
         foreach (var item in targets)
         {
@@ -512,7 +517,7 @@ private void HighlightTreeViewNode(string targetPath)
             var newName   = newBaseName + extension;
             var newPath   = Path.Combine(dir, newName);
 
-            renamePlan.Add((oldPath, newPath, newName));
+            renamePlan.Add((item, oldPath, newPath, newName));
         }
 
         // ── 事前チェック1: 変更後ファイル名の重複（計画内での重複） ──
@@ -552,50 +557,116 @@ private void HighlightTreeViewNode(string targetPath)
         }
 
         // ── リネーム実行 ──
-        var renamedItems = new List<(ListViewItem Item, string NewName)>();
+        // 先に全対象を一時名へ退避し、元の名前を空けてから最終名を割り当てる。
+        var effectiveRenamePlan = renamePlan
+            .Where(rename => !string.Equals(
+                rename.OldPath,
+                rename.NewPath,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        var stagedRenames = new List<StagedRename>();
+        var completedRenames = new List<StagedRename>();
+        var currentFileName = "";
 
-        foreach (var (oldPath, newPath, newName) in renamePlan)
+        try
         {
-            try
+            foreach (var rename in effectiveRenamePlan)
             {
-                if (Directory.Exists(oldPath))
-                    Directory.Move(oldPath, newPath);
-                else
-                    File.Move(oldPath, newPath);
-
-                // 対応する ListViewItem を記録（後でUI更新用）
-                var item = fileListView.Items
-                    .Cast<ListViewItem>()
-                    .FirstOrDefault(i => string.Equals(i.Tag as string, oldPath,
-                        StringComparison.OrdinalIgnoreCase));
-
-                if (item != null)
-                {
-                    renamedItems.Add((item, newName));
-                }
+                currentFileName = Path.GetFileName(rename.OldPath);
+                var temporaryPath = CreateTemporaryPath(rename.OldPath);
+                MovePath(rename.OldPath, temporaryPath);
+                stagedRenames.Add(new StagedRename(rename.OldPath, temporaryPath, rename.NewPath));
             }
-            catch (Exception ex)
+
+            foreach (var stagedRename in stagedRenames)
             {
-                // 失敗したファイル名とエラー内容を表示して中断
-                MessageBox.Show(
-                    $"リネームに失敗しました。処理を中断します。\n\nファイル: {Path.GetFileName(oldPath)}\nエラー: {ex.Message}",
-                    "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                currentFileName = Path.GetFileName(stagedRename.NewPath);
+                MovePath(stagedRename.TemporaryPath, stagedRename.NewPath);
+                completedRenames.Add(stagedRename);
             }
         }
-
-        // ── UI更新：成功したアイテムのみ反映 ──
-        fileListView.BeginUpdate();
-        foreach (var (item, newName) in renamedItems)
+        catch (Exception ex)
         {
-            var dir     = Path.GetDirectoryName(item.Tag as string) ?? "";
-            var newPath = Path.Combine(dir, newName);
+            RollBackRenames(stagedRenames, completedRenames);
+            MessageBox.Show(
+                $"リネームに失敗しました。変更を可能な範囲で元に戻しました。\n\nファイル: {currentFileName}\nエラー: {ex.Message}",
+                "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
 
+        // ── UI更新：全件成功後に反映 ──
+        fileListView.BeginUpdate();
+        foreach (var (item, _, newPath, newName) in renamePlan)
+        {
             item.Text            = newName;        // 名前列
             item.SubItems[1].Text = "";            // 変更後ファイル名列をクリア
             item.Tag             = newPath;        // Tagのパスも更新
         }
         fileListView.EndUpdate();
+    }
+
+    private static void RollBackRenames(
+        IReadOnlyList<StagedRename> stagedRenames,
+        IReadOnlyCollection<StagedRename> completedRenames)
+    {
+        // 確定済みの項目もいったん一時名へ戻し、元パスの衝突をなくす。
+        foreach (var completedRename in completedRenames.Reverse())
+        {
+            try
+            {
+                if (PathExists(completedRename.NewPath) && !PathExists(completedRename.TemporaryPath))
+                {
+                    MovePath(completedRename.NewPath, completedRename.TemporaryPath);
+                }
+            }
+            catch
+            {
+                // 復元処理は可能な項目だけ継続する。
+            }
+        }
+
+        foreach (var stagedRename in stagedRenames.Reverse())
+        {
+            try
+            {
+                if (PathExists(stagedRename.TemporaryPath) && !PathExists(stagedRename.OldPath))
+                {
+                    MovePath(stagedRename.TemporaryPath, stagedRename.OldPath);
+                }
+            }
+            catch
+            {
+                // 復元処理は可能な項目だけ継続する。
+            }
+        }
+    }
+
+    private static string CreateTemporaryPath(string sourcePath)
+    {
+        var directory = Path.GetDirectoryName(sourcePath) ?? "";
+
+        string temporaryPath;
+        do
+        {
+            temporaryPath = Path.Combine(directory, $".mh-renamer-{Guid.NewGuid():N}.tmp");
+        }
+        while (PathExists(temporaryPath));
+
+        return temporaryPath;
+    }
+
+    private static bool PathExists(string path) => File.Exists(path) || Directory.Exists(path);
+
+    private static void MovePath(string sourcePath, string destinationPath)
+    {
+        if (Directory.Exists(sourcePath))
+        {
+            Directory.Move(sourcePath, destinationPath);
+        }
+        else
+        {
+            File.Move(sourcePath, destinationPath);
+        }
     }
 
 
