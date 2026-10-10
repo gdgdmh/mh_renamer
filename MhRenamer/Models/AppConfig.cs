@@ -1,4 +1,4 @@
-namespace MhRenamerWpf.Models;
+namespace MhRenamer.Models;
 
 public sealed class AppConfig
 {

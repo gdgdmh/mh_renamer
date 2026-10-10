@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace MhRenamerWpf.Services;
+namespace MhRenamer.Services;
 
 public sealed record RenameRequest(string OldPath, string NewPath);
 

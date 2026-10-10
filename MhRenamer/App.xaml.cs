@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace MhRenamerWpf;
+namespace MhRenamer;
 
 public partial class App : Application
 {

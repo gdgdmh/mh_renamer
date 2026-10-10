@@ -1,8 +1,8 @@
 using System.IO;
 using System.Text.Json;
-using MhRenamerWpf.Models;
+using MhRenamer.Models;
 
-namespace MhRenamerWpf.Services;
+namespace MhRenamer.Services;
 
 public static class AppConfigManager
 {

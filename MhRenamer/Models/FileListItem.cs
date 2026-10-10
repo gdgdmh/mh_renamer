@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace MhRenamerWpf.Models;
+namespace MhRenamer.Models;
 
 public sealed class FileListItem : INotifyPropertyChanged
 {

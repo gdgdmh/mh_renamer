@@ -6,10 +6,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using MhRenamerWpf.Models;
-using MhRenamerWpf.Services;
+using MhRenamer.Models;
+using MhRenamer.Services;
 
-namespace MhRenamerWpf;
+namespace MhRenamer;
 
 public partial class MainWindow : Window
 {

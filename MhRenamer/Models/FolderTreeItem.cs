@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace MhRenamerWpf.Models;
+namespace MhRenamer.Models;
 
 public sealed class FolderTreeItem : INotifyPropertyChanged
 {
